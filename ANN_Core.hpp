@@ -5,6 +5,7 @@
 #include "ANN_CoreConfig.hpp"
 #include "ANN_Sample.hpp"
 #include "ANN_TrainingProgress.hpp"
+#include "ANN_TestProgress.hpp"
 #include "ANN_TrainingMetadata.hpp"
 #include "ANN_PredictMetadata.hpp"
 #include "ANN_TestResult.hpp"
@@ -97,6 +98,11 @@ namespace ANN
         trainingCallback = callback;
       }
 
+      void setTestCallback(TestCallback<T> callback)
+      {
+        testCallback = callback;
+      }
+
       //-- Log level --//
       void setLogLevel(LogLevel level)
       {
@@ -137,6 +143,7 @@ namespace ANN
       LogLevel logLevel = LogLevel::ERROR;
 
       TrainingCallback<T> trainingCallback;
+      TestCallback<T> testCallback;
 
     private:
       //-- Timing state --//

@@ -201,6 +201,8 @@ TestResult<T> CoreCPU<T>::test(ulong numSamples, const SampleProvider<T>& sample
 
   T totalLoss = 0;
   ulong totalCorrect = 0;
+  std::atomic<ulong> completedSamples{0};
+  QMutex callbackMutex;
 
   for (ulong b = 0; b < numBatches; b++) {
     Samples<T> batch = sampleProvider(sampleIndices, batchSize, b);
@@ -234,6 +236,16 @@ TestResult<T> CoreCPU<T>::test(ulong numSamples, const SampleProvider<T>& sample
 
       if (predIdx == expIdx)
         workerCorrects[workerIndex]++;
+
+      ulong completed = ++completedSamples;
+
+      if (this->testCallback) {
+        QMutexLocker locker(&callbackMutex);
+        TestProgress<T> progress;
+        progress.currentSample = completed;
+        progress.totalSamples = numSamples;
+        this->testCallback(progress);
+      }
     });
 
     for (int i = 0; i < numThreads; i++) {
